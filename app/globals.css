@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/* ===== Coincheck風 クリーンホワイト × ミントグリーン スタイルガイド ===== */
+:root {
+  --bg: #f7f9fa;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --line: #e5e9ee;
+  --line-strong: #d5dbe2;
+
+  --ink: #1f2933;
+  --ink-2: #52606d;
+  --ink-3: #8a96a3;
+
+  --mint: #00d09c;
+  --mint-deep: #00b386;
+  --mint-soft: #e6faf5;
+  --mint-tint: #f2fdf9;
+  --coral: #ff5a5f;
+  --coral-deep: #e0464b;
+  --coral-soft: #ffeced;
+  --amber: #f5a623;
+  --amber-soft: #fff6e5;
+  --blue: #3b82f6;
+  --blue-soft: #eaf2ff;
+
+  --btc: #f7931a;
+  --eth: #627eea;
+  --sol: #9945ff;
+  --sol-2: #14f195;
+
+  --radius-card: 20px;
+  --shadow-card: 0 1px 2px rgba(31, 41, 51, 0.04), 0 8px 24px -16px rgba(31, 41, 51, 0.16);
+  --shadow-pop: 0 24px 64px -24px rgba(31, 41, 51, 0.35);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-mint: var(--mint);
+  --color-mint-deep: var(--mint-deep);
+  --color-mint-soft: var(--mint-soft);
+  --color-mint-tint: var(--mint-tint);
+  --color-coral: var(--coral);
+  --color-coral-deep: var(--coral-deep);
+  --color-coral-soft: var(--coral-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-blue: var(--blue);
+  --color-blue-soft: var(--blue-soft);
+  --color-btc: var(--btc);
+  --color-eth: var(--eth);
+  --color-sol: var(--sol);
+  --font-sans: var(--font-body), "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-num: var(--font-display), "Inter", system-ui, sans-serif;
+  --radius-card: var(--radius-card);
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+}
+
+@layer base {
+  html {
+    color: var(--ink);
+    background: var(--bg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  ::selection {
+    background: var(--mint-soft);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .num {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 9999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .pill-mint {
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+  }
+  .pill-coral {
+    background: var(--coral-soft);
+    color: var(--coral-deep);
+  }
+  .pill-gray {
+    background: var(--surface-3);
+    color: var(--ink-2);
+  }
+  .pill-amber {
+    background: var(--amber-soft);
+    color: #b4731a;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 12px;
+    padding: 0.55rem 0.95rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.1s ease,
+      box-shadow 0.15s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--surface-2);
+    border-color: var(--line-strong);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-mint {
+    background: var(--mint);
+    border-color: var(--mint);
+    color: #fff;
+  }
+  .btn-mint:hover {
+    background: var(--mint-deep);
+    border-color: var(--mint-deep);
+  }
+  .btn-coral {
+    background: var(--coral);
+    border-color: var(--coral);
+    color: #fff;
+    box-shadow: 0 6px 18px -8px rgba(255, 90, 95, 0.7);
+  }
+  .btn-coral:hover {
+    background: var(--coral-deep);
+    border-color: var(--coral-deep);
+  }
+  .btn-ghost {
+    border-color: transparent;
+    background: transparent;
+  }
+  .input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.875rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input:focus {
+    border-color: var(--mint);
+    box-shadow: 0 0 0 3px rgba(0, 208, 156, 0.18);
+  }
+  .tab {
+    border-radius: 9999px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-2);
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .tab:hover {
+    background: var(--surface-3);
+  }
+  .tab[data-active="true"] {
+    background: var(--ink);
+    color: #fff;
+  }
+  .coin-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    font-family: var(--font-num);
+    flex: none;
+  }
+  .coin-BTC {
+    background: var(--btc);
+  }
+  .coin-ETH {
+    background: var(--eth);
+  }
+  .coin-SOL {
+    background: linear-gradient(135deg, var(--sol) 0%, var(--sol-2) 100%);
+  }
+  .divider {
+    height: 1px;
+    background: var(--line);
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 9999px;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 208, 156, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(0, 208, 156, 0);
+  }
+}
+.live-dot {
+  animation: pulse-dot 1.8s ease-out infinite;
+}
+@keyframes pulse-dot-red {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 95, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 90, 95, 0);
+  }
+}
+.halt-dot {
+  animation: pulse-dot-red 1.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot,
+  .halt-dot {
+    animation: none;
+  }
+}

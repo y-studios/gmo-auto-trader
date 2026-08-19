@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1ee0ad"/>
+      <stop offset="0.6" stop-color="#00d09c"/>
+      <stop offset="1" stop-color="#00b386"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eefcf7"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- antenna -->
+  <line x1="256" y1="92" x2="256" y2="128" stroke="#ffffff" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="256" cy="82" r="22" fill="#ffffff"/>
+  <!-- coin body -->
+  <circle cx="256" cy="292" r="168" fill="url(#coin)"/>
+  <circle cx="256" cy="292" r="140" fill="none" stroke="#00b386" stroke-opacity="0.18" stroke-width="10"/>
+  <!-- eyes -->
+  <rect x="186" y="214" width="40" height="58" rx="20" fill="#00b386"/>
+  <rect x="286" y="214" width="40" height="58" rx="20" fill="#00b386"/>
+  <!-- trend line mouth -->
+  <polyline points="168,392 222,352 260,372 334,318" fill="none" stroke="#00906b" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="298,318 336,316 338,356" fill="none" stroke="#00906b" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
