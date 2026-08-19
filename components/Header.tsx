@@ -24,7 +24,7 @@ export function Header({
             </span>
             <div className="min-w-0 leading-tight">
               <p className="font-bold text-[15px] truncate"><span className="hidden sm:inline">GMOコイン自動売買AI</span><span className="sm:hidden">GMO自動売買</span></p>
-              <p className="num text-[10px] text-ink-3 tracking-wide hidden sm:block whitespace-nowrap">GMO COIN AUTO TRADER AI · PRIVATE</p>
+              <p className="num text-[10px] text-ink-3 tracking-wide hidden sm:block whitespace-nowrap">GMO COIN AUTO TRADER AI</p>
             </div>
           </div>
 
