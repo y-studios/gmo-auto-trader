@@ -4,14 +4,21 @@
 **RSI(14) / MACD(12,26,9) / ボリンジャーバンド(20,2σ) の1時間足 × 機械的リスク管理（-3%損切り・+5%利確・-20%で緊急停止）**
 で3ヶ月間24時間自動運用し、資産推移・勝率・保有ポジション・AIの売買判断理由をスマホ/PCから監視するプライベートダッシュボード。
 
-- 公開URL（暫定・稼働中）: https://y-studios.github.io/gmo-auto-trader/
-- カスタムサブドメイン（DNS 反映後に有効化）: `gmotrader.shindan.biz`（`public/CNAME`）
+- 公開URL: https://gmo-auto-trader.pages.dev/（**Cloudflare Access で保護**。`20000227takumi@gmail.com` 以外はメールのワンタイムPINログインを求められ、通過できない）
 - デザイン: Coincheck 風クリーンホワイト（#FFFFFF / #F7F9FA）× ミントグリーン（#00D09C 利益・買い）× コーラルレッド（#FF5A5F 損失・売り）
+
+## アクセス制限（重要）
+
+自動売買の資産・戦略が見える性質上、**Cloudflare Access で本人のメールアドレス1件のみ許可**している。
+- Zero Trust Team: `shrill-hat-a1f5.cloudflareaccess.com`
+- Access アプリ: `GMOコイン自動売買AI`（対象ドメイン `gmo-auto-trader.pages.dev`）、ポリシー「本人のみ許可」（email = `20000227takumi@gmail.com`）、認証はCloudflare組み込みのワンタイムPIN（メール）
+- 旧 GitHub Pages（`y-studios.github.io/gmo-auto-trader/`）は誰でも閲覧できてしまうため 2026-08-20 に無効化済み（`gh api -X DELETE repos/y-studios/gmo-auto-trader/pages`）。以後は Cloudflare Pages のみが本番
+- 50ユーザーまで無料（Cloudflare Access Free）。許可メールを増減する場合は Access アプリのポリシーを編集する
 
 ## 構成
 
 ```
-app/                 Next.js 16 App Router（output: "export" の静的サイト。GitHub Pages で配信）
+app/                 Next.js 16 App Router（output: "export" の静的サイト。Cloudflare Pages で配信）
 components/          ダッシュボード UI（Bento Grid: 資産 / 戦績 / 資産推移 / ポジション / AI判定 / 安全装置 / 取引ログ）
 lib/indicators.mjs   RSI・EMA・MACD・ボリンジャーバンド（純関数）
 lib/strategy.mjs     売買判定・ポジションサイズ・緊急停止ライン（ブラウザとボットで共用）
@@ -19,7 +26,7 @@ lib/gmo.mjs          GMOコイン Public / Private API クライアント（HMAC
 lib/preset-data.ts   10万円運用シミュレーションの初期プリセット（自動生成・後述）
 scripts/bot.mjs      ボットランナー（GitHub Actions cron / ローカル）。state.json を更新
 scripts/gen-icons.mjs ファビコン / OGP 生成
-.github/workflows/deploy.yml  main へ push → GitHub Pages デプロイ（basePath 自動切替）
+.github/workflows/deploy.yml  main へ push → Cloudflare Pages デプロイ（wrangler-action）
 .github/workflows/bot.yml     15分おきにボット実行（vars.BOT_ENABLED=true のときだけ）
 ```
 
@@ -29,7 +36,7 @@ scripts/gen-icons.mjs ファビコン / OGP 生成
    無ければ `lib/preset-data.ts` のプリセットを表示する（ヘッダーに「デモ運用」バッジ）。
 2. `scripts/bot.mjs` は 1時間足（直近170本）を Public API から取得 → 指標計算 → 既存ポジションの決済判定 →
    緊急停止ライン判定 → 新規エントリー判定（同じ足で二重判定しない）→ `state.json` を書き出す。
-3. GitHub Actions の `bot.yml` がそれを main にコミットし、`deploy.yml` を叩いて Pages を更新する。
+3. GitHub Actions の `bot.yml` がそれを main にコミットし、`deploy.yml` を叩いて Cloudflare Pages を更新する。
 
 ### 売買ルール（`lib/strategy.mjs` の RISK 定数がそのまま UI に表示される）
 
@@ -68,7 +75,8 @@ gh workflow run bot.yml --repo y-studios/gmo-auto-trader -f mode=check       # �
 ```bash
 npm ci
 npm run dev                      # http://localhost:3000
-npm run build                    # out/ に静的出力（NEXT_PUBLIC_BASE_PATH=/gmo-auto-trader で暫定URL構成）
+npm run build                    # out/ に静的出力
+npx wrangler pages deploy out --project-name=gmo-auto-trader --commit-dirty=true   # 手動デプロイ（要 CLOUDFLARE_API_TOKEN）
 npm run icons                    # app/favicon.ico, app/icon.png, public/og.png を再生成
 ```
 
@@ -79,8 +87,7 @@ npm run icons                    # app/favicon.ico, app/icon.png, public/og.png 
 （同時保有 2 銘柄以内・現金の範囲内・4h クールダウン）。集計値は勝率 62.5%（15勝9敗）/ PF 1.84 / 総資産 ¥108,450 /
 決済ベース最大 DD -4.2%。実口座の state.json が存在するときは表示されない。
 
-## カスタムサブドメインへの切替（DNS 設定後）
+## カスタムドメインを付ける場合
 
-1. `gmotrader.shindan.biz` に `CNAME → y-studios.github.io` を追加（ラッコの DNS ゾーンエディタ）
-2. `gh api -X PUT repos/y-studios/gmo-auto-trader/pages -f cname=gmotrader.shindan.biz -F https_enforced=true`
-3. `gh workflow run deploy.yml --repo y-studios/gmo-auto-trader` → `basePath` が自動で `""` になりルート配信
+Cloudflare Pages のプロジェクト設定 → Custom domains でドメインを追加すると、Access のポリシーも
+そのカスタムドメインに向けて追加登録すれば同様に保護できる（`gmo-auto-trader.pages.dev` 単体の設定は残しておいてよい）。

@@ -19,7 +19,7 @@ const body = Noto_Sans_JP({
 
 const SITE_NAME = "GMOコイン自動売買AI";
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://gmotrader.shindan.biz").replace(/\/$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://gmo-auto-trader.pages.dev").replace(/\/$/, "");
 const DESCRIPTION =
   "完全非公開・自分専用。GMOコインの公式APIを連携し、元手10万円をRSI / MACD / ボリンジャーバンド × 3%損切り・5%利確で3ヶ月間24時間自動運用。資産推移・勝率・保有ポジション・AIの売買判断理由をリアルタイム監視するプライベートダッシュボード。";
 

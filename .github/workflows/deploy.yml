@@ -1,21 +1,19 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
+
+# Cloudflare Access で保護された gmo-auto-trader.pages.dev（本人のメールアドレスのみ許可）に
+# 静的ビルドをデプロイする。GitHub Pages は 2026-08-20 に無効化済み（誰でも閲覧できてしまうため）。
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: cf-pages-deploy
+  cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,26 +21,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      # base_path は Pages 側の設定から自動決定される:
-      #   - 暫定 (y-studios.github.io/gmo-auto-trader/) → "/gmo-auto-trader"
-      #   - カスタムサブドメイン有効化後 (public/CNAME) → ""（ルート配信）
-      - id: pages
-        uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.origin }}
-      - uses: actions/upload-pages-artifact@v3
+          NEXT_PUBLIC_BASE_PATH: ""
+          NEXT_PUBLIC_SITE_URL: "https://gmo-auto-trader.pages.dev"
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=gmo-auto-trader --commit-dirty=true
