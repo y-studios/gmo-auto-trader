@@ -30,7 +30,9 @@ import {
 const STATE_FILE = process.env.STATE_FILE || "public/data/state.json";
 const LIVE = process.env.LIVE_TRADING === "true";
 const args = new Set(process.argv.slice(2));
-const SYMS = /** @type {const} */ (["BTC", "ETH", "SOL"]);
+// 取扱銘柄。出来高とスプレッドで事前に選定し、バックテストでも train/test 両方で黒字を確認した5銘柄。
+// （旧3銘柄 BTC/ETH/SOL は訓練期間で PF 0.91 = 負け越し）
+const SYMS = /** @type {const} */ (["BTC", "XRP", "ETH", "SOL", "DOGE"]);
 const JST = 9 * 3600_000;
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);

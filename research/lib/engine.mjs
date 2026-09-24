@@ -15,7 +15,7 @@ export const DEFAULT_COSTS = {
 
 /** 数量の丸め単位 */
 export const STEPS = {
-  BTC: 0.0001, ETH: 0.01, SOL: 0.1, XRP: 1, DOGE: 1, ADA: 1, LINK: 0.1, XLM: 1,
+  BTC: 0.00001, ETH: 0.0001, SOL: 0.01, XRP: 1, DOGE: 1, ADA: 1, LINK: 0.1, XLM: 1,
 };
 
 /**
