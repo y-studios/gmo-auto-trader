@@ -1,10 +1,11 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { FlaskConical, CircleHelp, CalendarCheck } from "lucide-react";
+import { FlaskConical, CircleHelp, CalendarCheck, Target } from "lucide-react";
 import { yen, pct, fmtDateTime } from "@/lib/format";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const LAB_URL = `${BASE_PATH}/data/lab.json`;
+const FORECAST_URL = `${BASE_PATH}/data/forecast.json`;
 
 /** 採用判断に必要なトレード数（これ未満では「成績が良い案」を選ばない） */
 const PRELIM_TRADES = 30;
@@ -13,6 +14,15 @@ const FINAL_TRADES = 60;
 type Trade = { pnl: number; exitAt: number };
 type Variant = { cash: number; positions: unknown[]; trades: Trade[]; curve: { t: number; equity: number }[] };
 type Lab = { startedAt: string; startCapital: number; lastBarTime: number | null; variants: Record<string, Variant> };
+
+type Band = { p10: number; median: number; p90: number };
+type Forecast = {
+  generatedAt: string;
+  targetDate: string;
+  horizonDays: number;
+  startCapital: number;
+  variants: Record<string, { equity: Band; trades: Band; winRate: Band | null; upProbability: number }>;
+};
 
 /** 確認日カレンダー（CHECKPOINTS.md と同じ内容。日付は売買頻度からの見込み） */
 const CHECKPOINTS = [
@@ -34,26 +44,32 @@ const META = [
 ];
 
 let lab: Lab | null = null;
+let forecast: Forecast | null = null;
+let snap: { lab: Lab | null; forecast: Forecast | null } = { lab: null, forecast: null };
 let fetched = false;
 const listeners = new Set<() => void>();
+const publish = () => {
+  snap = { lab, forecast };
+  listeners.forEach((x) => x());
+};
 function subscribe(l: () => void) {
   listeners.add(l);
   if (!fetched) {
     fetched = true;
-    fetch(`${LAB_URL}?t=${Math.floor(Date.now() / 60000)}`, { cache: "no-store" })
+    const bust = `?t=${Math.floor(Date.now() / 60000)}`;
+    fetch(`${LAB_URL}${bust}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (j && j.variants) {
-          lab = j as Lab;
-          listeners.forEach((x) => x());
-        }
-      })
+      .then((j) => { if (j && j.variants) { lab = j as Lab; publish(); } })
+      .catch(() => {});
+    fetch(`${FORECAST_URL}${bust}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (j && j.variants) { forecast = j as Forecast; publish(); } })
       .catch(() => {});
   }
   return () => void listeners.delete(l);
 }
-const getLab = () => lab;
-const getServer = () => null;
+const getLab = () => snap;
+const getServer = () => snap;
 
 function statsOf(v: Variant, startCapital: number) {
   const trades = v.trades ?? [];
@@ -72,7 +88,9 @@ function statsOf(v: Variant, startCapital: number) {
 }
 
 export function LabCard() {
-  const data = useSyncExternalStore(subscribe, getLab, getServer);
+  const store = useSyncExternalStore(subscribe, getLab, getServer);
+  const data = store.lab;
+  const fc = store.forecast;
 
   if (!data) {
     return (
@@ -149,17 +167,17 @@ export function LabCard() {
           <thead>
             <tr className="text-ink-3 text-[11px] border-b border-line">
               <th className="text-left font-bold py-2 pr-2">案</th>
-              <th className="text-right font-bold py-2 px-2">件数</th>
-              <th className="text-right font-bold py-2 px-2">勝率</th>
-              <th className="text-right font-bold py-2 px-2">PF</th>
-              <th className="text-right font-bold py-2 px-2">予想PF</th>
-              <th className="text-right font-bold py-2 px-2">資産</th>
-              <th className="text-right font-bold py-2 pl-2">損益率</th>
+              <th className="text-right font-bold py-2 px-2">件数<span className="block text-ink-3/70 font-normal">予想</span></th>
+              <th className="text-right font-bold py-2 px-2">勝率<span className="block text-ink-3/70 font-normal">予想</span></th>
+              <th className="text-right font-bold py-2 px-2">PF<span className="block text-ink-3/70 font-normal">予想</span></th>
+              <th className="text-right font-bold py-2 px-2">資産<span className="block text-ink-3/70 font-normal">予想(中央値)</span></th>
+              <th className="text-right font-bold py-2 pl-2">損益率<span className="block text-ink-3/70 font-normal">予想の8割レンジ</span></th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
               const up = r.s.ret > 0;
+              const f = fc?.variants?.[r.id];
               const pfText = r.s.n === 0 ? "—" : r.s.pf === Infinity ? "∞" : r.s.pf.toFixed(2);
               return (
                 <tr key={r.id} className="border-b border-line/60 last:border-0">
@@ -173,13 +191,27 @@ export function LabCard() {
                       {r.s.open > 0 && <span className="flex-none text-[10px] text-mint-deep font-bold">保有{r.s.open}</span>}
                     </div>
                   </td>
-                  <td className="text-right px-2 tabular-nums text-ink-2">{r.s.n}</td>
-                  <td className="text-right px-2 tabular-nums text-ink-2">{r.s.n ? `${(r.s.winRate * 100).toFixed(1)}%` : "—"}</td>
-                  <td className="text-right px-2 tabular-nums font-bold text-ink">{pfText}</td>
-                  <td className="text-right px-2 tabular-nums text-ink-3">{r.expectPf != null ? r.expectPf.toFixed(2) : "—"}</td>
-                  <td className="text-right px-2 tabular-nums text-ink-2">{yen(r.s.equity)}</td>
+                  <td className="text-right px-2 tabular-nums text-ink-2">
+                    {r.s.n}
+                    <span className="block text-[10px] text-ink-3">{f ? f.trades.median : "—"}</span>
+                  </td>
+                  <td className="text-right px-2 tabular-nums text-ink-2">
+                    {r.s.n ? `${(r.s.winRate * 100).toFixed(1)}%` : "—"}
+                    <span className="block text-[10px] text-ink-3">{f?.winRate ? `${(f.winRate.median * 100).toFixed(0)}%` : "—"}</span>
+                  </td>
+                  <td className="text-right px-2 tabular-nums font-bold text-ink">
+                    {pfText}
+                    <span className="block text-[10px] text-ink-3 font-normal">{r.expectPf != null ? r.expectPf.toFixed(2) : "—"}</span>
+                  </td>
+                  <td className="text-right px-2 tabular-nums text-ink-2">
+                    {yen(r.s.equity)}
+                    <span className="block text-[10px] text-ink-3">{f ? yen(f.equity.median) : "—"}</span>
+                  </td>
                   <td className={`text-right pl-2 tabular-nums font-bold ${up ? "text-mint-deep" : r.s.ret < 0 ? "text-coral-deep" : "text-ink-3"}`}>
                     {r.s.n || r.s.open ? pct(r.s.ret * 100) : "—"}
+                    <span className="block text-[10px] text-ink-3 font-normal">
+                      {f ? `${yen(f.equity.p10)}〜${yen(f.equity.p90)}` : "—"}
+                    </span>
                   </td>
                 </tr>
               );
@@ -188,7 +220,19 @@ export function LabCard() {
         </table>
       </div>
 
-      <div className="mt-4 flex items-start gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-[11px] text-ink-2">
+      {fc && (
+        <div className="mt-3 flex items-start gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-[11px] text-ink-2">
+          <Target size={14} className="flex-none mt-0.5 text-ink-3" />
+          <p className="leading-relaxed">
+            <span className="font-bold text-ink">灰色の数字は {fc.generatedAt.slice(0, 10)} 時点で事前登録した予想です（{fc.targetDate} 時点・{fc.horizonDays}日後）。</span>
+            4年分のバックテストから {fc.horizonDays} 日のローリング窓をすべて取り、その分布の中央値と上下10%を使っています。
+            後から動かせないよう `public/data/forecast.json` に固定してあります。
+            結果が出たあとに「そう思っていた」と言えてしまうのを防ぐためです。
+          </p>
+        </div>
+      )}
+
+      <div className="mt-3 flex items-start gap-2 rounded-2xl border border-line bg-surface px-4 py-3 text-[11px] text-ink-2">
         <CircleHelp size={14} className="flex-none mt-0.5 text-ink-3" />
         <p className="leading-relaxed">
           <span className="font-bold text-ink">D と F は「負ける」予想で入れています。</span>
