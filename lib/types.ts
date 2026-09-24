@@ -1,4 +1,4 @@
-export type SymbolCode = "BTC" | "ETH" | "SOL";
+export type SymbolCode = "BTC" | "XRP" | "ETH" | "SOL" | "DOGE";
 
 export type ExitType = "stop_loss" | "take_profit" | "trailing" | "signal_exit" | "early_cut" | "emergency";
 

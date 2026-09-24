@@ -7,7 +7,7 @@ import { fmtDateTime, num, pct, yen } from "@/lib/format";
 import type { DashboardModel } from "@/lib/engine";
 import type { SymbolCode } from "@/lib/types";
 
-const SYMS: SymbolCode[] = ["BTC", "ETH", "SOL"];
+const SYMS: SymbolCode[] = ["BTC", "XRP", "ETH", "SOL", "DOGE"];
 
 function RsiBar({ value }: { value: number | null }) {
   const v = value ?? 50;
@@ -22,9 +22,11 @@ function RsiBar({ value }: { value: number | null }) {
 
 export function SignalBoard({ m }: { m: DashboardModel }) {
   const rows = useMemo(() => {
-    return SYMS.map((s) => {
+    return SYMS.filter((s) => (m.marketBars?.[s]?.length ?? m.marketCloses[s]?.length ?? 0) >= 30).map((s) => {
       const closes = m.marketCloses[s];
-      const snap = snapshot(closes);
+      // 高値ブレイクとATRの判定には高安が要る。バーがあればバーを、無ければ終値だけで評価する
+      const bars = m.marketBars?.[s];
+      const snap = snapshot(bars && bars.length ? bars : closes);
       const open = m.openPositions.find((p) => p.symbol === s);
       const decision = open ? evaluateExit({ symbol: s, size: open.size, entryPrice: open.entryPrice, entryAt: open.entryAt, peakPrice: open.peakPrice }, snap) : evaluateEntry(snap);
       const vol = volatilityLotMultiplier(closes);
@@ -67,7 +69,7 @@ export function SignalBoard({ m }: { m: DashboardModel }) {
                     {vol.multiplier < 1 && <span className="pill pill-amber">ボラ拡大→ロット半減</span>}
                   </div>
                   <p className="text-[11px] text-ink-3 num mt-0.5">
-                    終値 {yen(snap.price)} ・ 24h <span className={change24 >= 0 ? "text-mint-deep" : "text-coral"}>{pct(change24)}</span> ・ スコア {decision.score}/6
+                    終値 {yen(snap.price)} ・ 24h <span className={change24 >= 0 ? "text-mint-deep" : "text-coral"}>{pct(change24)}</span> {decision.score > 0 ? <> ・ ブレイク強さ {decision.score.toFixed(2)}ATR</> : null}
                   </p>
                 </div>
               </div>

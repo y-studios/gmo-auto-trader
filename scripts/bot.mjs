@@ -214,7 +214,7 @@ async function refreshMarket(client, s) {
     const done = bars.filter((b) => b.openTime + 3600_000 <= Date.now());
     s.marketBars = s.marketBars || {};
     // 高値ブレイク(168本)とATR(24本)の判定に高安が要るのでOHLCのまま持つ
-    s.marketBars[sym] = done.slice(-180);
+    s.marketBars[sym] = done.slice(-180).map((b) => ({ t: b.openTime, o: b.open, h: b.high, l: b.low, c: b.close }));
     s.marketCloses[sym] = done.slice(-180).map((b) => b.close);
     s.marketBarTimes[sym] = done.length ? done[done.length - 1].openTime : null;
   }

@@ -29,6 +29,8 @@
   --eth: #627eea;
   --sol: #9945ff;
   --sol-2: #14f195;
+  --xrp: #23292f;
+  --doge: #c2a633;
 
   --radius-card: 20px;
   --shadow-card: 0 1px 2px rgba(31, 41, 51, 0.04), 0 8px 24px -16px rgba(31, 41, 51, 0.16);
@@ -226,6 +228,12 @@
   }
   .coin-SOL {
     background: linear-gradient(135deg, var(--sol) 0%, var(--sol-2) 100%);
+  }
+  .coin-XRP {
+    background: var(--xrp);
+  }
+  .coin-DOGE {
+    background: var(--doge);
   }
   .divider {
     height: 1px;

@@ -10,6 +10,7 @@ import { PositionsCard } from "./PositionsCard";
 import { SignalBoard } from "./SignalBoard";
 import { RiskCard } from "./RiskCard";
 import { TradeLog } from "./TradeLog";
+import { LabCard } from "./LabCard";
 import { EmergencyModal } from "./EmergencyModal";
 import { ApiKeyModal } from "./ApiKeyModal";
 import { Footer } from "./Footer";
@@ -109,6 +110,10 @@ export function Dashboard() {
           </motion.div>
 
           <motion.div {...fade} transition={{ duration: 0.3, delay: 0.26 }} className="lg:col-span-3">
+            <LabCard />
+          </motion.div>
+
+          <motion.div {...fade} transition={{ duration: 0.3, delay: 0.3 }} className="lg:col-span-3">
             <TradeLog m={m} />
           </motion.div>
         </div>

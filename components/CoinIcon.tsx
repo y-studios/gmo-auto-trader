@@ -1,6 +1,6 @@
 import type { SymbolCode } from "@/lib/types";
 
-const LABEL: Record<SymbolCode, string> = { BTC: "₿", ETH: "Ξ", SOL: "◎" };
+const LABEL: Record<SymbolCode, string> = { BTC: "₿", XRP: "✕", ETH: "Ξ", SOL: "◎", DOGE: "Ð" };
 
 export function CoinIcon({ symbol, size = 32, className = "" }: { symbol: SymbolCode; size?: number; className?: string }) {
   return (
@@ -14,5 +14,5 @@ export function CoinIcon({ symbol, size = 32, className = "" }: { symbol: Symbol
   );
 }
 
-export const SYMBOL_NAME: Record<SymbolCode, string> = { BTC: "ビットコイン", ETH: "イーサリアム", SOL: "ソラナ" };
-export const PAIR: Record<SymbolCode, string> = { BTC: "BTC/JPY", ETH: "ETH/JPY", SOL: "SOL/JPY" };
+export const SYMBOL_NAME: Record<SymbolCode, string> = { BTC: "ビットコイン", XRP: "リップル", ETH: "イーサリアム", SOL: "ソラナ", DOGE: "ドージコイン" };
+export const PAIR: Record<SymbolCode, string> = { BTC: "BTC/JPY", XRP: "XRP/JPY", ETH: "ETH/JPY", SOL: "SOL/JPY", DOGE: "DOGE/JPY" };

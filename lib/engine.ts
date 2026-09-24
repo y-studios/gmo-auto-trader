@@ -24,6 +24,8 @@ export interface Dataset {
   decisionLogs: DecisionLog[];
   equityCurve: EquityPoint[];
   marketCloses: Record<SymbolCode, number[]>;
+  /** 高値ブレイク・ATRの判定に必要なOHLC（ボットが書き出す。プリセットには無い） */
+  marketBars?: Record<SymbolCode, { t: number; o: number; h: number; l: number; c: number }[]>;
   marketClosesAt: string;
   haltedByBot?: { at: string; reason: string } | null;
 }
@@ -78,6 +80,7 @@ export interface DashboardModel {
   source: Dataset["source"];
   mode: Dataset["mode"];
   marketCloses: Record<SymbolCode, number[]>;
+  marketBars?: Record<SymbolCode, { t: number; o: number; h: number; l: number; c: number }[]>;
   marketClosesAt: string;
   asOf: string;
   startAt: string;
@@ -242,6 +245,7 @@ export function buildModel(bot: BotState, ds: Dataset = PRESET_DATASET): Dashboa
     source: ds.source,
     mode: ds.mode,
     marketCloses: ds.marketCloses,
+    marketBars: ds.marketBars,
     marketClosesAt: ds.marketClosesAt,
     asOf,
     startAt: ds.startAt,
