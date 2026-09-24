@@ -1,6 +1,6 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { FlaskConical, CircleHelp } from "lucide-react";
+import { FlaskConical, CircleHelp, CalendarCheck } from "lucide-react";
 import { yen, pct, fmtDateTime } from "@/lib/format";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -13,6 +13,16 @@ const FINAL_TRADES = 60;
 type Trade = { pnl: number; exitAt: number };
 type Variant = { cash: number; positions: unknown[]; trades: Trade[]; curve: { t: number; equity: number }[] };
 type Lab = { startedAt: string; startCapital: number; lastBarTime: number | null; variants: Record<string, Variant> };
+
+/** 確認日カレンダー（CHECKPOINTS.md と同じ内容。日付は売買頻度からの見込み） */
+const CHECKPOINTS = [
+  { date: "2026-09-26", title: "最初の売買が出たか", detail: "どれか1案でも件数が1以上になっていれば配管は正常" },
+  { date: "2026-10-01", title: "1週間ちゃんと回っているか", detail: "A/B/Cが各3件前後、Dが10件前後。最終足が当日か" },
+  { date: "2026-10-14", title: "★Dの反証テスト（30件）", detail: "Dが勝率60%前後でマイナスなら基盤は信用してよい。増えていたら全部やり直し" },
+  { date: "2026-11-03", title: "Dの本判定（60件）", detail: "件数が倍になっても結論が変わらないか" },
+  { date: "2026-11-27", title: "予備判定（A/B/Cが30件）", detail: "実測PFが予想PFから外れていないかを見る。まだ採用は決めない" },
+  { date: "2027-01-29", title: "★本判定・採用決定", detail: "PF1.0超え・予想どおりの案から1つ選び、実弾へ進む" },
+];
 
 const META = [
   { id: "A", label: "breakout 本命", note: "本番と同一ロジック", expectPf: 1.17 },
@@ -111,6 +121,27 @@ export function LabCard() {
           週3〜4件しか売買しないため、予備判定まで約2ヶ月かかります。
         </p>
       </div>
+
+      {/* 次の確認日 */}
+      {(() => {
+        const today = new Date().toISOString().slice(0, 10);
+        const next = CHECKPOINTS.find((c) => c.date >= today);
+        if (!next) return null;
+        const left = Math.ceil((new Date(`${next.date}T00:00:00+09:00`).getTime() - Date.now()) / 86400_000);
+        return (
+          <div className="mt-3 flex items-start gap-2 rounded-2xl border border-mint/30 bg-mint-tint px-4 py-3">
+            <CalendarCheck size={15} className="flex-none mt-0.5 text-mint-deep" />
+            <div className="text-[12px] leading-relaxed">
+              <span className="font-bold text-ink">次に確認する日: {next.date}</span>
+              <span className="text-ink-3">（{left <= 0 ? "今日" : `あと${left}日`}）</span>
+              <span className="block text-ink-2">{next.title} — {next.detail}</span>
+              <span className="block text-[11px] text-ink-3 mt-1">
+                それ以外の日は見なくてよい。週3〜4件しか売買しないので数字はほとんど動かない。
+              </span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 一覧 */}
       <div className="mt-4 overflow-x-auto">
