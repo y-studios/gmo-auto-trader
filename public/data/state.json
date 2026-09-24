@@ -2,14 +2,14 @@
  "source": "bot",
  "mode": "paper",
  "startAt": "2026-09-24T05:07:37.951Z",
- "asOf": "2026-09-24T05:35:54.504Z",
+ "asOf": "2026-09-24T05:42:58.901Z",
  "paperCash": 100000,
  "lastPrices": {
-  "BTC": 13297199,
-  "ETH": 424855,
+  "BTC": 13316801,
+  "ETH": 425838,
   "SOL": 18220,
-  "XRP": 238.001,
-  "DOGE": 14.95
+  "XRP": 239.274,
+  "DOGE": 14.986
  },
  "closedTrades": [],
  "openPositions": [],
@@ -973,7 +973,7 @@
    14.814
   ]
  },
- "marketClosesAt": "2026-09-24T05:35:54.220Z",
+ "marketClosesAt": "2026-09-24T05:42:58.870Z",
  "lastBarTime": {
   "BTC": 1790222400000,
   "ETH": 1790222400000,
