@@ -1,0 +1,120 @@
+{
+  "startedAt": "2026-09-24T05:42:21.058Z",
+  "startCapital": 100000,
+  "lastBarTime": 1790222400000,
+  "variants": {
+    "A": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    },
+    "B": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    },
+    "C": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    },
+    "D": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    },
+    "E": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [
+        {
+          "symbol": "BTC",
+          "notional": 50000,
+          "levels": {},
+          "reason": "初回エントリーのみ",
+          "limitPrice": null,
+          "expiresAtBar": 1790233200000
+        },
+        {
+          "symbol": "XRP",
+          "notional": 50000,
+          "levels": {},
+          "reason": "初回エントリーのみ",
+          "limitPrice": null,
+          "expiresAtBar": 1790233200000
+        }
+      ],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    },
+    "F": {
+      "cash": 100000,
+      "positions": [],
+      "pending": [],
+      "trades": [],
+      "curve": [
+        {
+          "t": 1790222400000,
+          "equity": 100000,
+          "cash": 100000,
+          "open": 0
+        }
+      ],
+      "lastExitAt": {},
+      "skipped": 0
+    }
+  }
+}
