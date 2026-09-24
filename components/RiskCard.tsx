@@ -9,9 +9,10 @@ export function RiskCard({ m, hasKeys }: { m: DashboardModel; hasKeys: boolean }
   const ratio = Math.min(1, Math.max(0, (m.equity - HALT_EQUITY) / (RISK.startCapital * 0.3)));
   const halted = m.status === "halted";
   const rules = [
-    { k: "許容リスク/回", v: `資金の最大 ${RISK.riskPerTradePct * 100}〜${RISK.riskPerTradeMaxPct * 100}%（¥${(RISK.startCapital * RISK.riskPerTradePct).toLocaleString()}〜¥${(RISK.startCapital * RISK.riskPerTradeMaxPct).toLocaleString()}）` },
-    { k: "自動損切り", v: `買値から -${RISK.stopLossPct * 100}% で成行強制決済` },
-    { k: "利確", v: `+${RISK.takeProfitPct * 100}% 到達／含み益+${RISK.trailingActivatePct * 100}%からトレーリング（-${RISK.trailingGapPct * 100}%）` },
+    { k: "エントリー", v: `直近${RISK.lookbackBars}本(7日)の高値を上抜け、かつSMA${RISK.smaPeriod}より上のときだけ買う` },
+    { k: "自動損切り", v: `買値 − ATR×${RISK.slAtr}（ボラティリティに応じて銘柄ごとに変わる）` },
+    { k: "利確", v: `買値 + ATR×${RISK.tpAtr}／含み益ATR×${RISK.trailAtr}からトレーリング（高値−ATR×${RISK.trailGapAtr}）` },
+    { k: "手仕舞い", v: `決着がつかない建玉は ${RISK.maxHoldHours} 時間（${RISK.maxHoldHours / 24}日）で成行決済` },
     { k: "同時保有", v: `最大 ${RISK.maxConcurrent} 銘柄・1銘柄 ${RISK.maxPositionPct * 100}% まで・現物のみ（レバなし）` },
     { k: "再エントリー", v: `同一銘柄は決済から ${RISK.cooldownHours} 時間のクールダウン` },
     { k: "ボラ連動", v: `24h値幅が7日平均の ${RISK.volLotReduceRatio} 倍以上でロット半減` },

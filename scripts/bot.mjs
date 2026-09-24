@@ -18,6 +18,7 @@ import { GmoClient } from "../lib/gmo.mjs";
 import {
   RISK,
   snapshot,
+  entryLevels,
   evaluateEntry,
   evaluateExit,
   positionSize,
@@ -143,8 +144,7 @@ async function main() {
 
   // 1) 既存ポジションの決済判定
   for (const pos of [...s.openPositions]) {
-    const closes = s.marketCloses[pos.symbol];
-    const snap = snapshot(closes);
+    const snap = snapshot(s.marketBars?.[pos.symbol] ?? s.marketCloses[pos.symbol]);
     snap.price = s.lastPrices[pos.symbol]; // 判定は最新ティックで
     pos.peakPrice = Math.max(pos.peakPrice ?? pos.entryPrice, snap.price);
     const d = evaluateExit(pos, snap);
@@ -180,7 +180,7 @@ async function main() {
       addLog(s, { symbol: sym, kind: "skip", title: "見送り（クールダウン）", reason: `決済から ${RISK.cooldownHours} 時間のクールダウン中` });
       continue;
     }
-    const snap = snapshot(closes);
+    const snap = snapshot(s.marketBars?.[sym] ?? closes);
     const d = evaluateEntry(snap);
     if (d.action !== "buy") {
       addLog(s, { symbol: sym, kind: "skip", title: d.action === "skip" ? "見送り（待機）" : "見送り（条件未達）", reason: `${d.summary}。${d.reasons.join("／")}` });
@@ -195,7 +195,7 @@ async function main() {
       continue;
     }
     if (vol.multiplier < 1) addLog(s, { symbol: sym, kind: "lot", title: "ロット半減（ボラティリティ連動）", reason: `24h値幅が7日平均の ${vol.ratio.toFixed(2)} 倍に拡大。ロットを50%に縮小` });
-    await openPosition(client, s, sym, size, s.lastPrices[sym], `${d.summary}。${d.reasons.join("／")}`);
+    await openPosition(client, s, sym, size, s.lastPrices[sym], `${d.summary}。${d.reasons.join("／")}`, snap.atr);
   }
 
   updateCurve(s);
@@ -207,10 +207,13 @@ async function main() {
 async function refreshMarket(client, s) {
   s.marketBarTimes = s.marketBarTimes || {};
   for (const sym of SYMS) {
-    const bars = await client.hourlyCloses(sym, 170);
+    const bars = await client.hourlyCloses(sym, 200);
     // 最後の足は未確定の可能性があるため、確定済み（openTime + 1h <= now）のみ使う
     const done = bars.filter((b) => b.openTime + 3600_000 <= Date.now());
-    s.marketCloses[sym] = done.slice(-120).map((b) => b.close);
+    s.marketBars = s.marketBars || {};
+    // 高値ブレイク(168本)とATR(24本)の判定に高安が要るのでOHLCのまま持つ
+    s.marketBars[sym] = done.slice(-180);
+    s.marketCloses[sym] = done.slice(-180).map((b) => b.close);
     s.marketBarTimes[sym] = done.length ? done[done.length - 1].openTime : null;
   }
   s.marketClosesAt = nowIso();
@@ -224,7 +227,7 @@ function updateCurve(s) {
   else s.equityCurve.push({ date, equity: Math.round(equity) });
 }
 
-async function openPosition(client, s, symbol, size, price, reason) {
+async function openPosition(client, s, symbol, size, price, reason, atrAtEntry) {
   let fill = price;
   if (LIVE) {
     const orderId = await client.marketOrder({ symbol, side: "BUY", size });
@@ -240,9 +243,14 @@ async function openPosition(client, s, symbol, size, price, reason) {
   } else {
     s.paperCash -= size * price;
   }
-  const pos = { id: uid("P"), symbol, size, entryAt: nowIso(), entryPrice: fill, peakPrice: fill, entryReason: reason };
+  // 損切り・利確のラインはエントリー時のATRで確定させ、以後この値で判定する
+  const lv = atrAtEntry ? entryLevels(fill, atrAtEntry) : {};
+  const pos = {
+    id: uid("P"), symbol, size, entryAt: nowIso(), entryPrice: fill, peakPrice: fill, entryReason: reason,
+    stopPrice: lv.stopPrice, tpPrice: lv.tpPrice, atrAtEntry: lv.atrAtEntry,
+  };
   s.openPositions.push(pos);
-  log(`${LIVE ? "LIVE" : "PAPER"} OPEN ${symbol} ${size} @ ${fill}`);
+  log(`${LIVE ? "LIVE" : "PAPER"} OPEN ${symbol} ${size} @ ${fill}` + (lv.stopPrice ? ` SL=${Math.round(lv.stopPrice)} TP=${Math.round(lv.tpPrice)}` : ""));
 }
 
 async function closePosition(client, s, pos, price, exitType, reason) {
